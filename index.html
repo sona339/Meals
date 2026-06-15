@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mise">
-<title>Mise — Weekly Meal Planner</title>
+<meta name="apple-mobile-web-app-title" content="Meals">
+<title>Meals — Weekly Meal Planner</title>
 <style>
 :root{
   --bg:#faf6ee;        /* warm rice paper */
@@ -274,40 +274,58 @@ nav.tabs button.active .ico{transform:translateY(-1px)}
   color:var(--leaf);font-family:ui-monospace,monospace;font-weight:700;margin-bottom:4px}
 .datacard-note{font-size:13px;color:var(--ink-soft);margin:0 0 12px}
 
-/* ---------- Print ---------- */
+/* ---------- Print (US Letter) ---------- */
 #printArea{display:none}
+@page{size:letter landscape;margin:0.4in 0.45in}
 @media print{
-  body{padding:0;background:#fff;font-size:11pt}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{background:#fff!important}
+  body{padding:0;margin:0;background:#fff;font-size:10pt;
+    font-family:Georgia,'Iowan Old Style',serif;color:#000}
   header,nav.tabs,main,.scrim,.toast{display:none!important}
   #printArea{display:block;padding:0;color:#000}
-  .p-head{display:flex;justify-content:space-between;align-items:baseline;
-    border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:12px}
-  .p-head h1{font-size:20pt;margin:0;font-family:Georgia,serif}
-  .p-head .p-range{font-size:11pt;color:#333}
+
+  .p-head{display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:2.5px solid #1f3a2e;padding-bottom:5px;margin-bottom:10px}
+  .p-head h1{font-size:19pt;margin:0;font-family:Georgia,serif;color:#1f3a2e;letter-spacing:.01em}
+  .p-head .p-range{font-size:11pt;color:#444;font-weight:600}
+
+  /* week grid: meals down the left, 7 days across — fills letter landscape */
   table.p-week{width:100%;border-collapse:collapse;table-layout:fixed}
-  table.p-week th,table.p-week td{border:1px solid #999;padding:5px 6px;
-    vertical-align:top;font-size:9.5pt;line-height:1.3}
-  table.p-week th{background:#eee;font-size:8.5pt;text-transform:uppercase;
-    letter-spacing:.05em;text-align:left}
-  table.p-week th.p-day{width:13%}
-  table.p-week .p-dish{font-weight:600}
-  .p-section{margin-top:18px;page-break-inside:avoid}
-  .p-section h2{font-size:13pt;border-bottom:1px solid #000;padding-bottom:3px;margin:0 0 8px}
-  .p-grocery{column-count:2;column-gap:28px}
-  .p-cat{break-inside:avoid;margin-bottom:8px}
-  .p-cat .p-cat-name{font-size:8.5pt;text-transform:uppercase;letter-spacing:.06em;
-    font-weight:700;border-bottom:1px solid #ccc;margin-bottom:3px}
-  .p-gitem{font-size:10pt;padding:1px 0}
-  .p-gitem::before{content:"☐ ";font-size:11pt}
-  .p-foot{margin-top:16px;font-size:8pt;color:#666;text-align:center}
+  table.p-week col.p-mealcol{width:9%}
+  table.p-week th,table.p-week td{border:0.75pt solid #b0a98f;padding:4px 6px;
+    vertical-align:top;line-height:1.28;overflow-wrap:break-word}
+  table.p-week thead th{background:#1f3a2e;color:#fff;font-size:8pt;
+    text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:5px 6px;
+    font-family:Georgia,serif}
+  table.p-week thead th .p-date{display:block;font-weight:400;font-size:7.5pt;
+    color:#cfe0c8;letter-spacing:.02em;margin-top:1px}
+  table.p-week tbody th{background:#f0ece0;font-size:7.5pt;text-transform:uppercase;
+    letter-spacing:.05em;text-align:left;color:#1f3a2e;font-weight:700;width:9%}
+  table.p-week tbody tr:nth-child(even) td{background:#faf8f2}
+  table.p-week .p-dish{font-weight:700;font-size:9pt;display:block}
+  table.p-week .p-ings{font-size:7.5pt;color:#555;display:block;margin-top:1px;line-height:1.2}
+  table.p-week td:empty::after,table.p-week td .p-blank{content:"";color:#ccc}
+
+  .p-section{margin-top:14px;page-break-inside:avoid;break-inside:avoid}
+  .p-section h2{font-size:12pt;color:#1f3a2e;border-bottom:1.5px solid #1f3a2e;
+    padding-bottom:3px;margin:0 0 8px;font-family:Georgia,serif}
+  .p-grocery{column-count:4;column-gap:22px}
+  .p-cat{break-inside:avoid;margin-bottom:9px}
+  .p-cat .p-cat-name{font-size:8pt;text-transform:uppercase;letter-spacing:.07em;
+    color:#3c6e47;font-weight:700;border-bottom:0.75pt solid #ccc;margin-bottom:3px;padding-bottom:1px}
+  .p-gitem{font-size:9pt;padding:1.5px 0;line-height:1.25}
+  .p-gitem::before{content:"\2610";margin-right:5px;font-size:10pt;color:#888}
+  .p-foot{margin-top:14px;font-size:7.5pt;color:#888;text-align:center;
+    border-top:0.5pt solid #ddd;padding-top:5px}
 }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <h1>Mise</h1>
-    <span class="tag">en place</span>
+    <h1>Meals</h1>
+    <span class="tag">weekly plan</span>
   </div>
   <div class="weeknav">
     <button id="prevWk" aria-label="Previous week">‹</button>
@@ -702,20 +720,27 @@ function buildPrint(){
   const wkPlan=plans[wk]||{};
   const wkLabel=weekOffset===0?'This Week':weekOffset===1?'Next Week':weekOffset===-1?'Last Week':`${fmt(mon)} – ${fmt(sun)}`;
 
+  // day column headers
+  let dayHeads='<th>Meal</th>';
+  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);
+    dayHeads+=`<th>${DOW[i].slice(0,3)}<span class="p-date">${fmt(d)}</span></th>`}
+
+  // meal rows with dish + ingredients
   let rows='';
   MEALS.forEach(meal=>{
     let cells=`<th>${meal}</th>`;
     for(let i=0;i<7;i++){
       const m=(wkPlan[i]&&wkPlan[i][meal])||null;
-      cells+=`<td>${m&&m.dish?`<span class="p-dish">${esc(m.dish)}</span>`:''}</td>`;
+      let c='<span class="p-blank"></span>';
+      if(m&&m.dish){
+        c=`<span class="p-dish">${esc(m.dish)}</span>`;
+      }
+      cells+=`<td>${c}</td>`;
     }
     rows+=`<tr>${cells}</tr>`;
   });
-  let dayHeads='<th></th>';
-  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);
-    dayHeads+=`<th class="p-day">${DOW[i].slice(0,3)} <span style="font-weight:400">${fmt(d)}</span></th>`}
 
-  // grocery (unchecked items only) grouped by category
+  // grocery (unchecked only) grouped by category
   let gro='';
   CATS.forEach(cat=>{
     const items=grocery.filter(i=>i.cat===cat&&!i.done);if(!items.length)return;
@@ -726,12 +751,14 @@ function buildPrint(){
     ? `<div class="p-section"><h2>Grocery List</h2><div class="p-grocery">${gro}</div></div>`
     : '';
 
+  const cols='<col class="p-mealcol">'+Array(7).fill('<col>').join('');
   document.getElementById('printArea').innerHTML=`
-    <div class="p-head"><h1>Meal Plan · ${wkLabel}</h1>
+    <div class="p-head"><h1>Meals · ${wkLabel}</h1>
       <span class="p-range">${fmt(mon)} – ${fmt(sun)}</span></div>
-    <table class="p-week"><thead><tr>${dayHeads}</tr></thead><tbody>${rows}</tbody></table>
+    <table class="p-week"><colgroup>${cols}</colgroup>
+      <thead><tr>${dayHeads}</tr></thead><tbody>${rows}</tbody></table>
     ${groSection}
-    <div class="p-foot">Mise — printed ${new Date().toLocaleDateString()}</div>`;
+    <div class="p-foot">Meals — printed ${new Date().toLocaleDateString()}</div>`;
 }
 document.getElementById('printBtn').onclick=()=>{buildPrint();window.print()};
 [document.getElementById('mealScrim'),document.getElementById('invScrim')].forEach(s=>
@@ -761,9 +788,9 @@ installBtn.onclick=async()=>{
   deferredPrompt.prompt();
   const {outcome}=await deferredPrompt.userChoice;
   deferredPrompt=null;installBtn.style.display='none';
-  if(outcome==='accepted')toast('Installing Mise…');
+  if(outcome==='accepted')toast('Installing Meals…');
 };
-window.addEventListener('appinstalled',()=>{installBtn.style.display='none';toast('Mise installed')});
+window.addEventListener('appinstalled',()=>{installBtn.style.display='none';toast('Meals installed')});
 
 /* ---------- Backup / Restore ---------- */
 document.getElementById('exportBtn').onclick=()=>{
