@@ -1,5 +1,5 @@
 // Mise service worker — offline caching
-const CACHE = 'mise-v1';
+const CACHE = 'mise-v2';
 const ASSETS = [
   './',
   './index.html',

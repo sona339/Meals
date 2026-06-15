@@ -274,6 +274,54 @@ nav.tabs button.active .ico{transform:translateY(-1px)}
   color:var(--leaf);font-family:ui-monospace,monospace;font-weight:700;margin-bottom:4px}
 .datacard-note{font-size:13px;color:var(--ink-soft);margin:0 0 12px}
 
+/* ---------- Recipes ---------- */
+.searchbar{
+  width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;
+  background:var(--panel);color:var(--ink);margin-bottom:11px;
+}
+.searchbar:focus{outline:none;border-color:var(--leaf)}
+.tagfilter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tagfilter button{
+  background:var(--panel);border:1px solid var(--line);color:var(--ink-soft);
+  font-size:12px;padding:5px 11px;border-radius:20px;
+  font-family:ui-monospace,monospace;letter-spacing:.02em;
+}
+.tagfilter button.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.recipe{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:13px 14px;margin-bottom:9px;box-shadow:var(--shadow);
+}
+.recipe-top{display:flex;align-items:flex-start;gap:10px}
+.recipe-src{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;font-size:17px;
+}
+.recipe-src.web{background:#eef3e9}
+.recipe-src.insta{background:linear-gradient(45deg,#fbe6d4,#f6dce6)}
+.recipe-body{flex:1;min-width:0}
+.recipe-body .rname{font-size:16px;font-weight:600;line-height:1.25}
+.recipe-body .rhost{font-size:11px;color:var(--ink-soft);font-family:ui-monospace,monospace;
+  letter-spacing:.02em;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recipe-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.recipe-tags .rt{font-size:11px;background:var(--turmeric-soft);color:#8a5a16;
+  border:1px solid #ecd9b7;padding:2px 8px;border-radius:14px;
+  font-family:ui-monospace,monospace}
+.recipe-acts{display:flex;gap:7px;margin-top:11px}
+.recipe-acts button{
+  flex:1;border:1px solid var(--line);background:#fff;color:var(--ink);
+  border-radius:9px;padding:8px;font-size:13px;
+}
+.recipe-acts button.open{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.recipe-acts button.toplan{background:var(--turmeric);color:#fff;border-color:var(--turmeric)}
+.recipe-acts .ricon{background:#fff;flex:0 0 auto;width:38px;color:var(--ink-soft)}
+.recipe-acts .ricon:active{color:var(--chili)}
+
+/* slot-picker chips in plan modal */
+.slotpick{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.slotpick .sp-day{font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-soft);font-family:ui-monospace,monospace}
+.slotpick select{width:100%}
+
 /* ---------- Print (US Letter) ---------- */
 #printArea{display:none}
 @page{size:letter landscape;margin:0.4in 0.45in}
@@ -400,19 +448,40 @@ nav.tabs button.active .ico{transform:translateY(-1px)}
       <input type="file" id="importFile" accept="application/json,.json" style="display:none">
     </div>
   </section>
+
+  <!-- RECIPES -->
+  <section class="view" id="view-recipes">
+    <div class="section-title">
+      <h2>Recipe Library</h2>
+      <span class="count" id="recipeCount"></span>
+    </div>
+    <div class="toolrow">
+      <button id="addRecipeBtn" class="primary">+ Add recipe</button>
+      <button id="bulkImportBtn">⥥ Bulk import links</button>
+    </div>
+    <input id="recipeSearch" class="searchbar" placeholder="Search recipes…" autocomplete="off">
+    <div id="tagFilter" class="tagfilter"></div>
+    <div id="recipeList"></div>
+  </section>
 </main>
 
 <nav class="tabs">
   <button data-tab="plan" class="active"><span class="ico">📖</span><span class="lbl">PLAN</span></button>
+  <button data-tab="recipes"><span class="ico">🍲</span><span class="lbl">RECIPES</span></button>
   <button data-tab="grocery"><span class="ico">🧺</span><span class="lbl">GROCERY</span><span class="badge" id="gBadge" style="display:none"></span></button>
   <button data-tab="kitchen"><span class="ico">🫙</span><span class="lbl">KITCHEN</span></button>
 </nav>
+<!--ENDTABS-->
 
 <!-- meal edit sheet -->
 <div class="scrim" id="mealScrim">
   <div class="sheet">
     <div class="grab"></div>
     <h3 id="mealSheetTitle">Edit meal</h3>
+    <div class="field" id="mRecipeField">
+      <label>Pick from saved recipes</label>
+      <select id="mRecipe"><option value="">— choose a recipe —</option></select>
+    </div>
     <div class="field">
       <label>Dish</label>
       <input id="mDish" placeholder="e.g. Palak paneer + jeera rice" autocomplete="off">
@@ -461,6 +530,81 @@ nav.tabs button.active .ico{transform:translateY(-1px)}
   </div>
 </div>
 
+<!-- recipe edit sheet -->
+<div class="scrim" id="recipeScrim">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3 id="recipeSheetTitle">Add recipe</h3>
+    <div class="field">
+      <label>Recipe name</label>
+      <input id="rName" placeholder="e.g. Dhaba-style dal fry" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Link <span style="text-transform:none;letter-spacing:0">(website or Instagram)</span></label>
+      <input id="rUrl" placeholder="https://…" autocomplete="off" inputmode="url">
+      <div class="hint" id="rUrlHint"></div>
+    </div>
+    <div class="field">
+      <label>Tags <span style="text-transform:none;letter-spacing:0">(comma-separated)</span></label>
+      <input id="rTags" placeholder="quick, paneer, high-protein" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Ingredients <span style="text-transform:none;letter-spacing:0">(comma-separated — used for groceries)</span></label>
+      <textarea id="rIngs" placeholder="spinach, paneer, onion, garlic"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-clear" id="rDelete" style="display:none">Delete</button>
+      <button class="btn-ghost" id="rCancel">Cancel</button>
+      <button class="btn-save" id="rSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- add-to-plan sheet -->
+<div class="scrim" id="toPlanScrim">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3 id="toPlanTitle">Add to plan</h3>
+    <div class="slotpick">
+      <div>
+        <div class="sp-day">Week</div>
+        <select id="tpWeek"></select>
+      </div>
+      <div>
+        <div class="sp-day">Day</div>
+        <select id="tpDay"></select>
+      </div>
+      <div>
+        <div class="sp-day">Meal</div>
+        <select id="tpMeal"></select>
+      </div>
+    </div>
+    <p class="hint" id="tpIngNote" style="margin-top:10px"></p>
+    <div class="sheet-actions">
+      <button class="btn-ghost" id="tpCancel">Cancel</button>
+      <button class="btn-save" id="tpSave">Add to slot</button>
+    </div>
+  </div>
+</div>
+
+<!-- bulk import sheet -->
+<div class="scrim" id="bulkScrim">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3>Bulk import links</h3>
+    <p class="hint" style="margin:-6px 0 12px">Paste one link per line. You can put a name before the link separated by a hyphen or a pipe, e.g. <em>Palak paneer - https://…</em>. Names and source are auto-detected; you can edit any of them afterward.</p>
+    <div class="field">
+      <textarea id="bulkText" style="min-height:160px" placeholder="https://www.cookwithmanali.com/palak-paneer/
+Paneer bhurji | https://instagram.com/reel/ABC123/
+https://hebbarskitchen.com/masala-dosa-recipe/"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-ghost" id="bulkCancel">Cancel</button>
+      <button class="btn-save" id="bulkSave">Import</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div id="printArea"></div>
@@ -481,7 +625,8 @@ let weekOffset=0;
 let plans=store.get('mise_plans',{});         // {weekKey:{0:{Breakfast:{dish,ings}}}}
 let grocery=store.get('mise_grocery',[]);      // [{id,name,cat,done,src}]
 let inventory=store.get('mise_inv',[]);        // [{id,name,cat,status}]
-const save=()=>{store.set('mise_plans',plans);store.set('mise_grocery',grocery);store.set('mise_inv',inventory)};
+let recipes=store.get('mise_recipes',[]);      // [{id,name,url,src,tags:[],ings}]
+const save=()=>{store.set('mise_plans',plans);store.set('mise_grocery',grocery);store.set('mise_inv',inventory);store.set('mise_recipes',recipes)};
 const uid=()=>Math.random().toString(36).slice(2,9);
 
 function mondayOf(off){
@@ -548,6 +693,21 @@ function openMeal(dayIdx,meal){
     b.onclick=()=>document.getElementById('mDish').value=d;sug.appendChild(b);
   });
   document.getElementById('mealScrim').classList.add('open');
+
+  // populate recipe picker
+  const rSel=document.getElementById('mRecipe');
+  rSel.innerHTML='<option value="">— choose a recipe —</option>';
+  document.getElementById('mRecipeField').style.display=recipes.length?'':'none';
+  recipes.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(r=>{
+    const o=document.createElement('option');o.value=r.id;
+    o.textContent=(r.src==='insta'?'📷 ':'🌐 ')+r.name;rSel.appendChild(o);
+  });
+  rSel.value='';
+  rSel.onchange=()=>{
+    const r=recipes.find(x=>x.id===rSel.value);if(!r)return;
+    document.getElementById('mDish').value=r.name;
+    if(r.ings)document.getElementById('mIngs').value=r.ings;
+  };
 }
 function closeMeal(){document.getElementById('mealScrim').classList.remove('open')}
 document.getElementById('mSave').onclick=()=>{
@@ -713,7 +873,201 @@ document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>switchTab(
 document.getElementById('prevWk').onclick=()=>{weekOffset--;renderPlan()};
 document.getElementById('nextWk').onclick=()=>{weekOffset++;renderPlan()};
 
-/* ---------- Print ---------- */
+/* ---------- RECIPES ---------- */
+let activeTag=null;
+function detectSrc(url){
+  return /instagram\.com/i.test(url)?'insta':'web';
+}
+function hostOf(url){
+  try{const h=new URL(url).hostname.replace(/^www\./,'');return h}catch(e){return ''}
+}
+function renderRecipes(){
+  const list=document.getElementById('recipeList');
+  const q=(document.getElementById('recipeSearch').value||'').toLowerCase().trim();
+  document.getElementById('recipeCount').textContent=`${recipes.length} saved`;
+
+  // tag filter chips
+  const allTags=[...new Set(recipes.flatMap(r=>r.tags||[]))].sort();
+  const tf=document.getElementById('tagFilter');tf.innerHTML='';
+  if(allTags.length){
+    allTags.forEach(tag=>{
+      const b=document.createElement('button');b.textContent=tag;
+      if(activeTag===tag)b.classList.add('on');
+      b.onclick=()=>{activeTag=activeTag===tag?null:tag;renderRecipes()};
+      tf.appendChild(b);
+    });
+  }
+
+  let shown=recipes.filter(r=>{
+    if(activeTag&&!(r.tags||[]).includes(activeTag))return false;
+    if(q){
+      const hay=(r.name+' '+(r.tags||[]).join(' ')+' '+(r.ings||'')+' '+hostOf(r.url)).toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+
+  list.innerHTML='';
+  if(!recipes.length){
+    list.innerHTML=`<div class="empty-state"><div class="big">🍲</div><div>No recipes saved yet.</div>
+      <div class="small">Add one, or bulk import your saved links.</div></div>`;return;
+  }
+  if(!shown.length){
+    list.innerHTML=`<div class="empty-state"><div class="big">🔍</div><div>No matches.</div></div>`;return;
+  }
+  shown.sort((a,b)=>a.name.localeCompare(b.name));
+  shown.forEach(r=>{
+    const card=document.createElement('div');card.className='recipe';
+    const isInsta=r.src==='insta';
+    const tagsHtml=(r.tags||[]).map(t=>`<span class="rt">${esc(t)}</span>`).join('');
+    card.innerHTML=`
+      <div class="recipe-top">
+        <div class="recipe-src ${isInsta?'insta':'web'}">${isInsta?'📷':'🌐'}</div>
+        <div class="recipe-body">
+          <div class="rname">${esc(r.name)}</div>
+          <div class="rhost">${esc(hostOf(r.url)||r.url)}</div>
+          ${tagsHtml?`<div class="recipe-tags">${tagsHtml}</div>`:''}
+        </div>
+      </div>
+      <div class="recipe-acts">
+        <button class="open">Open</button>
+        <button class="toplan">+ Add to plan</button>
+        <button class="ricon">✎</button>
+      </div>`;
+    card.querySelector('.open').onclick=()=>window.open(r.url,'_blank','noopener');
+    card.querySelector('.toplan').onclick=()=>openToPlan(r.id);
+    card.querySelector('.ricon').onclick=()=>openRecipe(r.id);
+    list.appendChild(card);
+  });
+}
+document.getElementById('recipeSearch').addEventListener('input',renderRecipes);
+
+/* recipe editor */
+let recipeCtx=null;
+function openRecipe(id){
+  recipeCtx=id;
+  const r=id?recipes.find(x=>x.id===id):null;
+  document.getElementById('recipeSheetTitle').textContent=r?'Edit recipe':'Add recipe';
+  document.getElementById('rName').value=r?r.name:'';
+  document.getElementById('rUrl').value=r?r.url:'';
+  document.getElementById('rTags').value=r?(r.tags||[]).join(', '):'';
+  document.getElementById('rIngs').value=r?(r.ings||''):'';
+  document.getElementById('rDelete').style.display=r?'':'none';
+  updateUrlHint();
+  document.getElementById('recipeScrim').classList.add('open');
+}
+function updateUrlHint(){
+  const u=document.getElementById('rUrl').value.trim();
+  const h=document.getElementById('rUrlHint');
+  if(!u){h.textContent='';return}
+  h.textContent=detectSrc(u)==='insta'?'📷 Instagram — opens in the Instagram app/site':`🌐 ${hostOf(u)||'website'}`;
+}
+document.getElementById('rUrl').addEventListener('input',updateUrlHint);
+document.getElementById('rSave').onclick=()=>{
+  const name=document.getElementById('rName').value.trim();
+  const url=document.getElementById('rUrl').value.trim();
+  if(!name){toast('Give it a name');return}
+  if(!url){toast('Add a link');return}
+  const tags=document.getElementById('rTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const ings=document.getElementById('rIngs').value.trim();
+  if(recipeCtx){
+    const r=recipes.find(x=>x.id===recipeCtx);
+    Object.assign(r,{name,url,src:detectSrc(url),tags,ings});
+  }else{
+    recipes.push({id:uid(),name,url,src:detectSrc(url),tags,ings});
+  }
+  save();renderRecipes();document.getElementById('recipeScrim').classList.remove('open');toast('Recipe saved');
+};
+document.getElementById('rDelete').onclick=()=>{
+  if(!confirm('Delete this recipe?'))return;
+  recipes=recipes.filter(x=>x.id!==recipeCtx);
+  save();renderRecipes();document.getElementById('recipeScrim').classList.remove('open');
+};
+document.getElementById('rCancel').onclick=()=>document.getElementById('recipeScrim').classList.remove('open');
+document.getElementById('addRecipeBtn').onclick=()=>openRecipe(null);
+
+/* bulk import */
+document.getElementById('bulkImportBtn').onclick=()=>{
+  document.getElementById('bulkText').value='';
+  document.getElementById('bulkScrim').classList.add('open');
+};
+document.getElementById('bulkCancel').onclick=()=>document.getElementById('bulkScrim').classList.remove('open');
+function nameFromUrl(url){
+  // turn last meaningful path segment into a title-ish name
+  try{
+    const u=new URL(url);
+    if(/instagram\.com/i.test(u.hostname))return 'Instagram recipe';
+    let seg=u.pathname.split('/').filter(Boolean).pop()||u.hostname.replace(/^www\./,'');
+    seg=seg.replace(/\.(html?|php|aspx)$/i,'').replace(/[-_]+/g,' ').replace(/\b\d{4,}\b/g,'').trim();
+    if(!seg)return hostOf(url);
+    return seg.replace(/\b\w/g,c=>c.toUpperCase());
+  }catch(e){return url}
+}
+document.getElementById('bulkSave').onclick=()=>{
+  const lines=document.getElementById('bulkText').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  let added=0,bad=0;
+  lines.forEach(line=>{
+    // split optional "name - url" or "name | url"
+    let name='',url='';
+    const m=line.match(/^(.*?)[\|\-–—]\s*(https?:\/\/\S+)\s*$/);
+    if(m){name=m[1].trim();url=m[2].trim();}
+    else{
+      const um=line.match(/(https?:\/\/\S+)/);
+      if(um){url=um[1];name=line.replace(um[1],'').replace(/[\|\-–—]/g,'').trim();}
+    }
+    if(!url){bad++;return}
+    if(!name)name=nameFromUrl(url);
+    if(recipes.some(r=>r.url===url))return; // skip dupes
+    recipes.push({id:uid(),name,url,src:detectSrc(url),tags:[],ings:''});
+    added++;
+  });
+  save();renderRecipes();document.getElementById('bulkScrim').classList.remove('open');
+  toast(`Imported ${added}${bad?` · ${bad} had no link`:''}`);
+};
+
+/* add recipe to a plan slot */
+let toPlanCtx=null;
+function openToPlan(recipeId){
+  toPlanCtx=recipeId;
+  const r=recipes.find(x=>x.id===recipeId);
+  document.getElementById('toPlanTitle').textContent=`Add: ${r.name}`;
+  const wkSel=document.getElementById('tpWeek');wkSel.innerHTML='';
+  [['0','This week'],['1','Next week'],['2','In 2 weeks']].forEach(([v,l])=>{
+    const o=document.createElement('option');o.value=v;o.textContent=l;wkSel.appendChild(o);
+  });
+  wkSel.value=String(Math.max(0,weekOffset));
+  const daySel=document.getElementById('tpDay');daySel.innerHTML='';
+  DOW.forEach((d,i)=>{const o=document.createElement('option');o.value=i;o.textContent=d;daySel.appendChild(o)});
+  const mealSel=document.getElementById('tpMeal');mealSel.innerHTML='';
+  MEALS.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;mealSel.appendChild(o)});
+  mealSel.value='Dinner';
+  document.getElementById('tpIngNote').textContent=r.ings
+    ? 'Its ingredients will be available for the grocery builder.'
+    : 'No ingredients saved on this recipe — add some to feed the grocery list.';
+  document.getElementById('toPlanScrim').classList.add('open');
+}
+document.getElementById('tpSave').onclick=()=>{
+  const r=recipes.find(x=>x.id===toPlanCtx);
+  const off=parseInt(document.getElementById('tpWeek').value,10);
+  const day=parseInt(document.getElementById('tpDay').value,10);
+  const meal=document.getElementById('tpMeal').value;
+  const wk=weekKey(off);
+  plans[wk]=plans[wk]||{};plans[wk][day]=plans[wk][day]||{};
+  plans[wk][day][meal]={dish:r.name,ings:r.ings||'',recipeId:r.id};
+  save();
+  document.getElementById('toPlanScrim').classList.remove('open');
+  if(off===weekOffset)renderPlan();
+  toast(`Added to ${DOW[day]} ${meal}`);
+};
+document.getElementById('tpCancel').onclick=()=>document.getElementById('toPlanScrim').classList.remove('open');
+
+/* close recipe modals on backdrop tap */
+['recipeScrim','toPlanScrim','bulkScrim'].forEach(id=>{
+  const s=document.getElementById(id);
+  s.addEventListener('click',e=>{if(e.target===s)s.classList.remove('open')});
+});
+
+
 function buildPrint(){
   const mon=mondayOf(weekOffset);const wk=weekKey(weekOffset);
   const sun=new Date(mon);sun.setDate(sun.getDate()+6);
@@ -766,12 +1120,17 @@ document.getElementById('printBtn').onclick=()=>{buildPrint();window.print()};
 
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
-renderPlan();renderGrocery();renderKitchen();
+renderPlan();renderGrocery();renderKitchen();renderRecipes();
 
 /* ---------- PWA: service worker ---------- */
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+  // when an updated worker takes control, refresh once to load the new version
+  let _swReloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(_swReloaded)return;_swReloaded=true;window.location.reload();
   });
 }
 
@@ -794,7 +1153,7 @@ window.addEventListener('appinstalled',()=>{installBtn.style.display='none';toas
 
 /* ---------- Backup / Restore ---------- */
 document.getElementById('exportBtn').onclick=()=>{
-  const data={mise:true,version:1,exported:new Date().toISOString(),plans,grocery,inventory};
+  const data={mise:true,version:2,exported:new Date().toISOString(),plans,grocery,inventory,recipes};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -812,8 +1171,8 @@ document.getElementById('importFile').onchange=e=>{
       const d=JSON.parse(reader.result);
       if(!d||!d.mise)throw new Error('not a Mise backup');
       if(!confirm('Restore this backup? It will replace everything currently saved on this device.'))return;
-      plans=d.plans||{};grocery=d.grocery||[];inventory=d.inventory||[];
-      save();renderPlan();renderGrocery();renderKitchen();
+      plans=d.plans||{};grocery=d.grocery||[];inventory=d.inventory||[];recipes=d.recipes||[];
+      save();renderPlan();renderGrocery();renderKitchen();renderRecipes();
       toast('Backup restored');
     }catch(err){toast('Couldn\u2019t read that file')}
     e.target.value='';
