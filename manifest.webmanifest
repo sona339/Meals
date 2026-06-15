@@ -1,6 +1,6 @@
 {
-  "name": "Mise — Weekly Meal Planner",
-  "short_name": "Mise",
+  "name": "Meals — Weekly Meal Planner",
+  "short_name": "Meals",
   "description": "Plan weekly meals, build a grocery list, and track your fridge and pantry.",
   "start_url": "./index.html",
   "scope": "./",
